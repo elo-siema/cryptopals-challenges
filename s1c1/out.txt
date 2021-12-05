@@ -1,0 +1,44 @@
+
+running 1 test
+keysize: 6, key:        ni  t
+keysize: 22, key:                       ronniee  n   en nnt in
+keysize: 9, key:           ni nti  
+keysize: 28, key:                               ote:nnonrii i   in o tr'&t
+keysize: 26, key:                           n    ii  ton n nr nnrinnn 
+keysize: 4, key:      onn
+keysize: 27, key:                            nni i in i&e'nto    itni  n
+keysize: 32, key:                                 ei t e  ihrn  nn ni ooni enn oir
+keysize: 30, key:                                'ie t n  nrn  n eoni o ioei i
+keysize: 36, key:                                      nn niis  ni i i tonirnt   i hniri  
+keysize: 24, key:                          nn  tnsi  t oinionn nn 
+keysize: 34, key:                                    innoo tn anio ien in rnin ieni  a
+keysize: 19, key:                    nn  n nii   ntoi  n
+keysize: 39, key:                                        eiennie inonnn oi  n i ee i    nirttii 
+keysize: 10, key:           nnn  n n i
+keysize: 33, key:                                  noe neen irr  o  n   nnteni o noi
+keysize: 35, key:                                    !o==i&en  r;s ino o   eerint  nrdin
+keysize: 12, key:              ii  onnin  
+keysize: 25, key:                          =e o+nn!   oininoniri o  
+keysize: 14, key:                   in o nrhi 
+keysize: 29, key:                              Terminator X: Bring the noise
+keysize: 23, key:                        tn  ei &  ni i ioenn ro
+keysize: 37, key:                                       iirt  n&  tnseiinee n 'iti no euion 
+keysize: 31, key:                                itotio  i  oin ii rne   nn ie!n
+keysize: 21, key:                      inn ort errti    iint
+keysize: 16, key:                 en  oon ienn oin
+keysize: 8, key:         innn onn
+keysize: 7, key:          nrin 
+keysize: 17, key:                   onn o tn iito  e
+keysize: 15, key:                noneni n nnre  
+keysize: 38, key:                                       nre n e t  ontone snn  n nnirr nini  n
+keysize: 18, key:                    ni niis   ini i t
+keysize: 20, key:                     io&t n n inne nniiii
+keysize: 11, key:              en  n  in
+keysize: 13, key:              n    ii iton 
+keysize: 2, key:    n
+keysize: 3, key:     n 
+keysize: 5, key:      n n  
+test tests::test_s1c6 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 7.20s
+

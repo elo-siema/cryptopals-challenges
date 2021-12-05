@@ -1,6 +1,11 @@
 use std::collections::HashMap;
 use std::io::{self, prelude::*, BufReader};
 use std::fs::File;
+use aes::{Aes128, Block, ParBlocks};
+use aes::cipher::{
+    BlockCipher, BlockEncrypt, BlockDecrypt, NewBlockCipher,
+    generic_array::GenericArray,
+};
 #[macro_use]
 extern crate lazy_static;
 
@@ -146,9 +151,84 @@ fn find_highest_scored_xored(input1: &str) -> (Option<String>, u64, char){
     highest
 }
 
+fn find_highest_scored_xored_nohex(input: &[u8]) -> (Option<String>, u64, char){
+    let mut highest = (None, 0 as u64, ' ');
+    for i in 0..255 {
+        let xored = std::str::from_utf8(&input.iter().map(|x| x ^ i).collect::<Vec<u8>>()).unwrap_or_default().to_owned();
+        let score = calculate_score(&xored);
+        //println!("{}, score: {} ", &xored, score);
+        if score > highest.1 {
+            highest = (Some(xored), score, std::char::from_u32(i as u32).unwrap());
+        }
+    }
+    //println!("{}, score: {} ", highest.0.unwrap(), highest.1);
+    highest
+}
+
+fn repeating_key_xor(input: &str, key: &str) -> String {
+    let xored = input
+        .chars()
+        .zip(key.chars().cycle())
+        .map(|(a, b)| a as u8 ^ b as u8)
+        .collect::<Vec<u8>>();
+    hex::encode(&xored)
+}
+
+fn repeating_key_xor_bytes(input: &[u8], key: &[u8]) -> Vec<u8> {
+    let xored = input
+        .iter()
+        .zip(key.iter().cycle())
+        .map(|(a, b)| a ^ b )
+        .collect::<Vec<u8>>();
+    xored
+}
+
+fn find_keysizes(input: &[u8]) -> Vec<usize> {
+    let mut results = (2..40)
+        .map( |keysize| {
+            let mut chunks = input.chunks(keysize);
+            let first = chunks.next().unwrap();
+            let second = chunks.next().unwrap();
+            
+            let distance = hamming::distance(first, second);
+            let distance_normalized = distance as f64 / keysize as f64;
+            (keysize, distance_normalized)
+        })
+        .collect::<Vec<(usize, f64)>>();
+
+    results.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+    results.reverse();
+
+    let x: (Vec<usize>, Vec<f64>) = results.into_iter().unzip();
+    x.0
+}
+
+fn solve_c6(keysize: usize, input: &[u8]) -> String {
+    let chunks: Vec<&[u8]> = input.chunks(keysize).collect();
+    let mut transposed = vec![vec![]; keysize];
+    for i in 0..keysize {
+        let mut result = Vec::<u8>::new();
+        for chunk in chunks.iter() {
+            let new_letter = chunk.get(i);
+            if let Some(letter) = new_letter {
+                result.push(*letter);
+            } 
+        }
+        transposed.push(result);
+    }
+
+    let keys = transposed
+        .iter()
+        .map(|arr| find_highest_scored_xored_nohex(arr).2)
+        .collect::<String>();
+
+    keys
+    
+}
+
 #[cfg(test)]
 mod tests {
-    use std::fs::File;
+    use std::{fs::File, alloc::System};
 
     use super::*;
 
@@ -182,6 +262,81 @@ mod tests {
         let result_str = &results.0;
 
         assert_eq!(result_str, "Now that the party is jumping\n");
+    }
+
+    #[test]
+    fn test_s1c5() {
+        assert_eq!(repeating_key_xor("Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal", "ICE"), "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f");
+    }
+
+    #[test]
+    fn test_hamming() {
+        assert_eq!(hamming::distance("this is a test".as_bytes(), "wokka wokka!!!".as_bytes()), 37);
+    }
+
+    #[test]
+    fn test_s1c6() {
+        /*let file = File::open("s1c6.txt");
+        //let results = BufReader::new(file).read(buf)
+        let unbased = base64::decode(&file).unwrap();
+
+        let keysizes = find_keysizes(&unbased);
+
+
+
+        /*for keysize in keysizes {
+            let key = solve_c6(keysize, &unbased);
+            println!("keysize: {}, key: {}", keysize, key);
+            let decoded = repeating_key_xor_bytes(&unbased, &key.as_bytes());
+            //println!("decoded: {}", String::from_utf8_lossy(&decoded));
+        }*/
+
+
+        let decoded = repeating_key_xor_bytes(&unbased, "Terminator X: Bring the noise".as_bytes());
+        println!("decoded: {}", String::from_utf8_lossy(&decoded));*/
+
+    }
+
+    #[test]
+    fn test_s1c7() {
+        let file = File::open("s1c7.txt")
+        .unwrap()
+        .bytes()
+        .into_iter()
+        .map(|x|x.unwrap())
+        .filter(|x| x != &('\n' as u8))
+        .collect::<Vec<u8>>();
+        let mut unbased = base64::decode(&file).unwrap();
+        //let mut unbased = GenericArray::from_slice(&unbased);
+        let mut chunks = unbased.chunks_exact(16).collect::<Vec<&[u8]>>();
+        let mut blocks : Vec<Block> = vec![];
+        for chunk in chunks.iter_mut() {
+            let mut chunk = chunk.to_owned();
+            let mut block = Block::from_mut_slice(&mut chunk);
+            blocks.push(block.to_owned());
+        }
+        
+        /*chunks
+        .iter()
+        .map(
+            |x| {
+                //let mut block = GenericArray::from_slice(x);
+                //let mut block = Block::clone_from_slice(x);
+                //block
+            }
+        ).collect();
+        */
+
+        let key = GenericArray::from_slice("YELLOW SUBMARINE".as_bytes());
+        
+        let cipher = Aes128::new(key);
+
+
+        cipher.decrypt_blocks(&mut blocks);
+
+        for block in blocks.iter() {
+            println!("{}", String::from_utf8_lossy(block.as_slice()));
+        }
     }
 
 }
